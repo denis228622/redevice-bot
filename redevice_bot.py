@@ -1,3 +1,4 @@
+import os
 import asyncio
 import nest_asyncio
 from telegram import Update, ReplyKeyboardMarkup
@@ -10,9 +11,11 @@ from telegram.ext import (
     ContextTypes,
 )
 
-TOKEN = "7985096400:AAEO57JNeeS2WOkDI_TtT1Vr-ZiOpySsnfQ"
+TOKEN = os.getenv("BOT_TOKEN")
+if not TOKEN:
+    raise RuntimeError("Error: BOT_TOKEN environment variable is not set")
 
-ADMIN_CHAT_ID = 1044925457  # Твой числовой Telegram ID
+ADMIN_CHAT_ID = 1044925457  # Твой Telegram ID
 
 PHOTO, DESCRIPTION, PRICE = range(3)
 
@@ -97,7 +100,8 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 async def main():
-    app = ApplicationBuilder().token(TOKEN).get_updates_pool_timeout(120).build()
+    nest_asyncio.apply()
+    app = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
         entry_points=[MessageHandler(filters.TEXT & filters.Regex("📱 Оценить технику"), handle_start_buttons)],
@@ -117,5 +121,4 @@ async def main():
     await app.run_polling()
 
 if __name__ == "__main__":
-    nest_asyncio.apply()
     asyncio.run(main())
