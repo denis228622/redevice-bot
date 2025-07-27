@@ -1,4 +1,3 @@
-import os
 import asyncio
 import nest_asyncio
 from telegram import Update, ReplyKeyboardMarkup
@@ -11,11 +10,9 @@ from telegram.ext import (
     ContextTypes,
 )
 
-TOKEN = os.getenv("BOT_TOKEN")
-if not TOKEN:
-    raise RuntimeError("Error: BOT_TOKEN environment variable is not set")
+TOKEN = "7985096400:AAEO57JNeeS2WOkDI_TtT1Vr-ZiOpySsnfQ"  # твой токен, вставил сюда
 
-ADMIN_CHAT_ID = 1044925457  # Твой Telegram ID
+ADMIN_CHAT_ID = 1044925457  # твой ID
 
 PHOTO, DESCRIPTION, PRICE = range(3)
 
@@ -104,7 +101,7 @@ async def main():
     app = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.TEXT & filters.Regex("📱 Оценить технику"), handle_start_buttons)],
+        entry_points=[MessageHandler(filters.Regex("^📱 Оценить технику$"), handle_start_buttons)],
         states={
             PHOTO: [MessageHandler(filters.PHOTO, get_photo)],
             DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_description)],
