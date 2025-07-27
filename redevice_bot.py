@@ -1,18 +1,9 @@
-import asyncio
-import nest_asyncio
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    MessageHandler,
-    filters,
-    ConversationHandler,
-    ContextTypes,
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes, ConversationHandler
+import asyncio
 
-TOKEN = "7985096400:AAEO57JNeeS2WOkDI_TtT1Vr-ZiOpySsnfQ"  # твой токен, вставил сюда
-
-ADMIN_CHAT_ID = 1044925457  # твой ID
+TOKEN = "7985096400:AAEO57JNeeS2WOkDI_TtT1Vr-ZiOpySsnfQ"
+ADMIN_CHAT_ID = 1044925457
 
 PHOTO, DESCRIPTION, PRICE = range(3)
 
@@ -22,17 +13,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ["📞 Связаться с менеджером"]
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-    await update.message.reply_text(
-        "Привет! Это бот по скупке техники Re:Device.", reply_markup=reply_markup
-    )
+    await update.message.reply_text("Привет! Это бот по скупке техники Re:Device.", reply_markup=reply_markup)
 
-async def handle_start_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
-
     if text == "📱 Оценить технику":
         await update.message.reply_text("Пришли фото техники.")
         return PHOTO
-
     elif text == "❓ Что мы скупаем?":
         await update.message.reply_text(
             "📦 Скупим:\n"
@@ -41,11 +28,9 @@ async def handle_start_buttons(update: Update, context: ContextTypes.DEFAULT_TYP
             "⌚ — Apple Watch, AirPods и др."
         )
         return ConversationHandler.END
-
     elif text == "📞 Связаться с менеджером":
         await update.message.reply_text("Напишите нам в Telegram: @skupka_denis")
         return ConversationHandler.END
-
     else:
         await update.message.reply_text("Выбери пункт из меню.")
         return ConversationHandler.END
@@ -56,9 +41,7 @@ async def get_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return PHOTO
     photo_file = update.message.photo[-1]
     context.user_data['photo_file_id'] = photo_file.file_id
-    await update.message.reply_text(
-        "Напиши краткое описание техники (модель, состояние, комплектация):"
-    )
+    await update.message.reply_text("Напиши краткое описание техники (модель, состояние, комплектация):")
     return DESCRIPTION
 
 async def get_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -69,7 +52,6 @@ async def get_description(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
     price_text = update.message.text
     context.user_data['price'] = price_text
-
     user = update.message.from_user
     username = f"@{user.username}" if user.username else user.full_name
 
@@ -87,9 +69,7 @@ async def get_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
         caption=caption,
     )
 
-    await update.message.reply_text(
-        "Спасибо! Ваша заявка отправлена. Мы скоро свяжемся с вами."
-    )
+    await update.message.reply_text("Спасибо! Ваша заявка отправлена. Мы скоро свяжемся с вами.")
     return ConversationHandler.END
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -97,11 +77,10 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return ConversationHandler.END
 
 async def main():
-    nest_asyncio.apply()
     app = ApplicationBuilder().token(TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[MessageHandler(filters.Regex("^📱 Оценить технику$"), handle_start_buttons)],
+        entry_points=[MessageHandler(filters.Regex("📱 Оценить технику"), handle_buttons)],
         states={
             PHOTO: [MessageHandler(filters.PHOTO, get_photo)],
             DESCRIPTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, get_description)],
@@ -112,7 +91,7 @@ async def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(conv_handler)
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_start_buttons))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_buttons))
 
     print("Бот запущен!")
     await app.run_polling()
